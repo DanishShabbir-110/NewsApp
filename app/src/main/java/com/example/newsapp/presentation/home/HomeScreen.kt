@@ -1,9 +1,11 @@
 package com.example.newsapp.presentation.home
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,9 +13,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -85,7 +90,11 @@ private fun HomeContent(
             else -> {
                 NewsContent(
                     news = uiState.news,
-                    onNewsClick = onNewsClick
+                    onNewsClick = onNewsClick,
+                    onLoadMore = {
+                        onIntent(HomeIntent.LoadMore)
+                    },
+                    isLoadingMore =uiState.isLoadingMore
                 )
             }
         }
@@ -95,7 +104,9 @@ private fun HomeContent(
 @Composable
 private fun NewsContent(
     news: List<News>,
-    onNewsClick: (News) -> Unit
+    isLoadingMore: Boolean,
+    onNewsClick: (News) -> Unit,
+    onLoadMore: () -> Unit
 ) {
     if (news.isEmpty()) {
         Text(
@@ -137,9 +148,7 @@ private fun NewsContent(
 
         items(
             items = remainingNews,
-            key = {
-                it.newsUrl
-            }
+            key = { it.newsUrl }
         ) { newsItem ->
 
             NewsCard(
@@ -148,6 +157,18 @@ private fun NewsContent(
                     onNewsClick(newsItem)
                 }
             )
+            if (newsItem != remainingNews.lastOrNull()&&!isLoadingMore) {
+                LaunchedEffect(newsItem.newsUrl) {
+                    onLoadMore()
+                }
+            }
+        }
+        if(isLoadingMore){
+            item{
+                Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center){
+                    LoadingIndicator()
+                }
+            }
         }
     }
 }
@@ -159,8 +180,6 @@ private fun CategorySection(
 ) {
     val categories = listOf(
         "general",
-        "business",
-        "technology",
         "sports",
         "health",
         "science",

@@ -5,5 +5,7 @@ sealed interface HomeIntent {
         val category: String
     ) : HomeIntent
 
+    data object LoadMore: HomeIntent
+
     data object Retry : HomeIntent
 }
