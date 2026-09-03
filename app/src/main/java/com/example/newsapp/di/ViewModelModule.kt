@@ -12,10 +12,10 @@ val viewModelModule = module {
     }
 
     viewModel {
-        NewsDetailViewModel()
+        NewsDetailViewModel(get())
     }
 
     viewModel {
-        SearchViewModel(get())
+        SearchViewModel(repository = get(), searchPreferences = get())
     }
 }

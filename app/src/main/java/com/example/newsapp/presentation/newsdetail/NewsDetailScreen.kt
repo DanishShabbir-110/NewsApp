@@ -53,7 +53,12 @@ fun NewsDetailContent(
             NewsTopAppBar(
                 title = "News Detail",
                 showBackButton = true,
-                onBackClick = onBackClick
+                onBackClick = onBackClick,
+                showBookmarkButton = true,
+                isBookmarked = uiState.isBookMarked,
+                onBookmarkClick={
+                    onIntent(NewsDetailIntent.BookmarkClick)
+                }
             )
         }
     ) { innerPadding ->

@@ -2,6 +2,7 @@ package com.example.newsapp.presentation.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.newsapp.data.local.datastore.SearchPreferences
 import com.example.newsapp.domain.model.News
 import com.example.newsapp.domain.repository.NewsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,8 +10,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SearchViewModel(private val repository: NewsRepository) : ViewModel() {
-    private var _uiState = MutableStateFlow(SearchUiState())
+class SearchViewModel(
+    private val repository: NewsRepository,
+    private val searchPreferences: SearchPreferences
+) : ViewModel() {
+    private var _uiState = MutableStateFlow(SearchUiState(recentSearches = searchPreferences.getRecentSearches()))
     val state = _uiState.asStateFlow()
 
     fun onIntent(intent: SearchIntent) {
@@ -38,17 +42,10 @@ class SearchViewModel(private val repository: NewsRepository) : ViewModel() {
     }
 
     private fun addRecentSearch(query: String) {
-
+        searchPreferences.saveRecentSearcher(query)
         _uiState.update { state ->
-
-            val updatedSearches =
-                listOf(query) +
-                        state.recentSearches.filterNot {
-                            it.equals(query, ignoreCase = true)
-                        }
-
             state.copy(
-                recentSearches = updatedSearches.take(6)
+                recentSearches = searchPreferences.getRecentSearches()
             )
         }
     }
@@ -63,7 +60,7 @@ class SearchViewModel(private val repository: NewsRepository) : ViewModel() {
     }
 
     private fun clearRecentSearches() {
-
+        searchPreferences.clearRecentSearches()
         _uiState.update {
             it.copy(
                 recentSearches = emptyList()
@@ -106,6 +103,7 @@ class SearchViewModel(private val repository: NewsRepository) : ViewModel() {
         _uiState.update {
             it.copy(
                 query = query,
+                news = if (query.isBlank()) emptyList() else it.news,
                 error = null
             )
         }

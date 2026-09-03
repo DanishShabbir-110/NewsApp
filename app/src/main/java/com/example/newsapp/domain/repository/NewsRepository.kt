@@ -15,17 +15,17 @@ interface NewsRepository {
         query: String
     ): List<News>
 
-//    suspend fun savedNews(
-//        news: News
-//    )
-//
-//    suspend fun removedSavedNews(
-//        newsUrl: String
-//    )
-//
-//    fun getSavedNews(): Flow<List<News>>
-//
-//    fun isNewsSaved(
-//        newsUrl: String
-//    ): Flow<Boolean>
+    suspend fun saveNews(
+        news: News
+    )
+
+    suspend fun removeSavedNews(
+        newsUrl: String
+    )
+
+    fun getSavedNews(): Flow<List<News>>
+
+    fun isNewsSaved(
+        newsUrl: String
+    ): Flow<Boolean>
 }

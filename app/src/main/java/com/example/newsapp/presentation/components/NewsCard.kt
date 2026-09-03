@@ -82,14 +82,6 @@ fun NewsCard(
                     maxLines = 1
                 )
             }
-            IconButton(
-                onClick = {}
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.BookmarkBorder,
-                    contentDescription = "Save news."
-                )
-            }
         }
     }
 }

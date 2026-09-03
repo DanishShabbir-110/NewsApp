@@ -3,14 +3,19 @@ package com.example.newsapp.presentation.search
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -36,44 +41,55 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.newsapp.domain.model.News
+import com.example.newsapp.presentation.components.EmptyState
+import com.example.newsapp.presentation.components.ErrorView
+import com.example.newsapp.presentation.components.LoadingIndicator
+import com.example.newsapp.presentation.components.NewsCard
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SearchScreen(
-    viewModel: SearchViewModel = koinViewModel()
+    viewModel: SearchViewModel = koinViewModel(),
+    onNewsClick: (News) -> Unit
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
 
     SearchContent(
         uiState = uiState,
-        onIntent = viewModel::onIntent
+        onIntent = viewModel::onIntent,
+        onNewsClick = onNewsClick
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SearchContent(uiState: SearchUiState, onIntent: (SearchIntent) -> Unit) {
-    val trendingSearches = listOf(
-        "Artificial Intelligence",
-        "Elon Musk",
-        "Bitcoin",
-        "Elections 2024",
-        "Climate Change",
-        "OpenAI",
-        "Stock Market Today"
-    )
+private fun SearchContent(
+    uiState: SearchUiState,
+    onIntent: (SearchIntent) -> Unit,
+    onNewsClick: (News) -> Unit
+) {
+
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .fillMaxSize().statusBarsPadding()
             .padding(horizontal = 20.dp)
     ) {
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "Search", fontSize = 26.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
+
+        Spacer(
+            modifier = Modifier.height(24.dp)
         )
-        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Search",
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
+
         SearchTextField(
             query = uiState.query,
             onQueryChange = {
@@ -83,89 +99,57 @@ fun SearchContent(uiState: SearchUiState, onIntent: (SearchIntent) -> Unit) {
                 onIntent(SearchIntent.Search)
             }
         )
-        if (uiState.recentSearches.isNotEmpty()) {
 
-            Spacer(
-                modifier = Modifier.height(24.dp)
-            )
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Text(
-                    text = "Recent Searches",
-                    modifier = Modifier.weight(1f),
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp
+        when {
+            uiState.query.isBlank()->{
+                SearchSuggestionContent(
+                    uiState = uiState,
+                    onIntent=onIntent
                 )
+            }
+            uiState.isLoading -> {
 
-                Text(
-                    text = "Clear all",
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.clickable {
-                        onIntent(
-                            SearchIntent.ClearRecentSearches
-                        )
+                LoadingIndicator(
+                    text = "Searching news..."
+                )
+            }
+
+            uiState.error != null -> {
+
+                ErrorView(
+                    message = uiState.error,
+                    onRetry = {
+                        onIntent(SearchIntent.Retry)
                     }
                 )
             }
 
-            Spacer(
-                modifier = Modifier.height(12.dp)
-            )
+            uiState.news.isNotEmpty() -> {
 
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
+                SearchResultList(
+                    news = uiState.news,
+                    onNewsClick = onNewsClick
+                )
+            }
 
-                uiState.recentSearches.forEach { search ->
+            uiState.query.isNotBlank() -> {
+                EmptyState(
+                    message = "No news found"
+                )
+            }
 
-                    RecentSearchChip(
-                        text = search,
-                        onClick = {
-                            onIntent(
-                                SearchIntent.RecentSearchClick(search)
-                            )
-                        }
-                    )
-                }
+            else -> {
+
+                SearchSuggestionContent(
+                    uiState = uiState,
+                    onIntent = onIntent
+                )
             }
         }
-
-        Spacer(
-            modifier = Modifier.height(28.dp)
-        )
-
-        Text(
-            text = "Trending Searches",
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 16.sp
-        )
-
-        Spacer(
-            modifier = Modifier.height(8.dp)
-        )
-
-        trendingSearches.forEach { trending ->
-
-            TrendingSearchItem(
-                text = trending,
-                onClick = {
-                    onIntent(
-                        SearchIntent.QueryChanged(trending)
-                    )
-                }
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.height(24.dp)
-        )
     }
 }
 
@@ -286,5 +270,158 @@ private fun TrendingSearchItem(
             text = text,
             fontSize = 15.sp
         )
+    }
+}
+
+@Composable
+private fun SearchResultList(
+    news: List<News>,
+    onNewsClick: (News) -> Unit
+) {
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(
+            bottom = 24.dp
+        )
+    ) {
+
+        item {
+
+            Text(
+                text = "Search Results",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(
+                modifier = Modifier.height(4.dp)
+            )
+
+            Text(
+                text = "${news.size} results found",
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+        }
+
+        items(
+            items = news,
+            key = { it.newsUrl }
+        ) { newsItem ->
+
+            NewsCard(
+                news = newsItem,
+                onClick = {
+                    onNewsClick(newsItem)
+                }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SearchSuggestionContent(
+    uiState: SearchUiState,
+    onIntent: (SearchIntent) -> Unit
+) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(
+                rememberScrollState()
+            )
+    ) {
+
+        if (uiState.recentSearches.isNotEmpty()) {
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Text(
+                    text = "Recent Searches",
+                    modifier = Modifier.weight(1f),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp
+                )
+
+                Text(
+                    text = "Clear all",
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable {
+                        onIntent(
+                            SearchIntent.ClearRecentSearches
+                        )
+                    }
+                )
+            }
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+
+                uiState.recentSearches.forEach { search ->
+
+                    RecentSearchChip(
+                        text = search,
+                        onClick = {
+                            onIntent(
+                                SearchIntent.RecentSearchClick(search)
+                            )
+                        }
+                    )
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.height(28.dp)
+            )
+        }
+
+        Text(
+            text = "Trending Searches",
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp
+        )
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
+
+        val trendingSearches = listOf(
+            "Artificial Intelligence",
+            "Bitcoin",
+            "Technology",
+            "Climate Change",
+            "OpenAI",
+            "Stock Market"
+        )
+
+        trendingSearches.forEach { trending ->
+
+            TrendingSearchItem(
+                text = trending,
+                onClick = {
+                    onIntent(
+                        SearchIntent.RecentSearchClick(trending)
+                    )
+                }
+            )
+        }
     }
 }
