@@ -43,12 +43,35 @@ class HomeViewModel(
             HomeIntent.LoadMore -> {
                 loadMore()
             }
+
+            HomeIntent.SelectAllCategory ->{
+                selectAllCategory()
+            }
         }
+    }
+
+    private fun selectAllCategory() {
+        currentPage=1
+        totalAvailableResults= Int.MAX_VALUE
+
+        _uiState.update {
+            it.copy(
+                selectedCategory = null,
+                news = emptyList(),
+                hasMoreData = true,
+                error = null
+            )
+        }
+        loadNews(
+            category = null,
+            isLoadingMore = false
+        )
     }
 
     private fun loadMore() {
 
         val state = _uiState.value
+
 
         if (state.isLoading) return
 
@@ -56,14 +79,11 @@ class HomeViewModel(
 
         if (!state.hasMoreData) return
 
-        val nextStartIndex =
-            (currentPage - 1) * PAGE_SIZE + 1
+        val nextStartIndex = (currentPage - 1) * PAGE_SIZE + 1
 
-        val nextEndIndex =
-            nextStartIndex + PAGE_SIZE - 1
+        val nextEndIndex = nextStartIndex + PAGE_SIZE - 1
 
         if (nextEndIndex > DEVELOPER_RESULT_LIMIT) {
-
             _uiState.update {
                 it.copy(
                     hasMoreData = false
@@ -154,7 +174,10 @@ class HomeViewModel(
                     page = currentPage,
                     pageSize = PAGE_SIZE
                 )
-
+                println("PAGINATION -> API page = $currentPage")
+                println("PAGINATION -> category = $category")
+                println("PAGINATION -> result.news.size = ${result.news.size}")
+                println("PAGINATION -> totalResult = ${result.totalResult}")
                 totalAvailableResults = minOf(
                     result.totalResult,
                     DEVELOPER_RESULT_LIMIT
@@ -162,13 +185,9 @@ class HomeViewModel(
 
                 _uiState.update { state ->
 
-                    val updatedNews =
-                        if (isLoadingMore) {
-
+                    val updatedNews = if (isLoadingMore) {
                             (state.news + result.news)
-                                .distinctBy {
-                                    it.newsUrl
-                                }
+                                .distinctBy { it.newsUrl }
 
                         } else {
 
@@ -177,16 +196,11 @@ class HomeViewModel(
 
                     val nextPage = currentPage + 1
 
-                    val nextStartIndex =
-                        (nextPage - 1) * PAGE_SIZE + 1
+                    val nextStartIndex = (nextPage - 1) * PAGE_SIZE + 1
 
-                    val nextEndIndex =
-                        nextStartIndex + PAGE_SIZE - 1
+                    val nextEndIndex = nextStartIndex + PAGE_SIZE - 1
 
-                    val hasMoreData =
-                        updatedNews.size < totalAvailableResults &&
-                                result.news.isNotEmpty() &&
-                                nextEndIndex <= DEVELOPER_RESULT_LIMIT
+                    val hasMoreData = updatedNews.size < totalAvailableResults && result.news.isNotEmpty() && nextEndIndex <= DEVELOPER_RESULT_LIMIT
 
                     state.copy(
                         isLoading = false,

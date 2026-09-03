@@ -12,7 +12,7 @@ espressoCore = "3.7.0"
 lifecycle = "2.11.0"
 activityCompose = "1.13.0"
 composeBom = "2026.08.00"
-navigationCompose = "2.9.8"
+
 
 koin = "4.1.1"
 
@@ -69,8 +69,6 @@ okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-intercepto
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 
-# Navigation
-androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 
 # Room
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }

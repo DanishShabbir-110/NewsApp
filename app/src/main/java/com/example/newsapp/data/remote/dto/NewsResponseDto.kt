@@ -2,6 +2,6 @@ package com.example.newsapp.data.remote.dto
 
 data class NewsResponseDto(
     val status:String,
-    val totalResult:Int,
+    val totalResults:Int,
     val articles:List<NewsDto>
 )

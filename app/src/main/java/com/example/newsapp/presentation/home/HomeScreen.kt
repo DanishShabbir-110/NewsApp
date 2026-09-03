@@ -11,14 +11,15 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -26,8 +27,10 @@ import com.example.newsapp.domain.model.News
 import com.example.newsapp.presentation.components.CategoryChip
 import com.example.newsapp.presentation.components.ErrorView
 import com.example.newsapp.presentation.components.FeaturedNewsCard
+import com.example.newsapp.presentation.components.FeaturedNewsCarousel
 import com.example.newsapp.presentation.components.LoadingIndicator
 import com.example.newsapp.presentation.components.NewsCard
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -35,6 +38,7 @@ fun HomeScreen(
     onNewsClick: (News) -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     HomeContent(
@@ -50,6 +54,7 @@ private fun HomeContent(
     onIntent: (HomeIntent) -> Unit,
     onNewsClick: (News) -> Unit
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -66,14 +71,27 @@ private fun HomeContent(
 
         CategorySection(
             selectedCategory = uiState.selectedCategory,
-            onCategoryClick = {
-                onIntent(
-                    HomeIntent.SelectCategory(it)
-                )
+            onCategoryClick = { category ->
+
+                if (category == "All") {
+
+                    onIntent(
+                        HomeIntent.SelectAllCategory
+                    )
+
+                } else {
+
+                    onIntent(
+                        HomeIntent.SelectCategory(
+                            category.lowercase()
+                        )
+                    )
+                }
             }
         )
 
         when {
+
             uiState.isLoading -> {
                 LoadingIndicator()
             }
@@ -94,7 +112,7 @@ private fun HomeContent(
                     onLoadMore = {
                         onIntent(HomeIntent.LoadMore)
                     },
-                    isLoadingMore =uiState.isLoadingMore
+                    isLoadingMore = uiState.isLoadingMore
                 )
             }
         }
@@ -108,6 +126,7 @@ private fun NewsContent(
     onNewsClick: (News) -> Unit,
     onLoadMore: () -> Unit
 ) {
+
     if (news.isEmpty()) {
         Text(
             text = "No News Available.",
@@ -116,10 +135,37 @@ private fun NewsContent(
         return
     }
 
-    val featuredNews = news.first()
-    val remainingNews = news.drop(1)
+    val listState = rememberLazyListState()
+
+    val featuredNews = news.take(3)
+    val remainingNews = news.drop(3)
+
+    LaunchedEffect(listState, news.size) {
+
+        snapshotFlow {
+            val layoutInfo = listState.layoutInfo
+
+            val lastVisibleItemIndex =
+                layoutInfo.visibleItemsInfo
+                    .lastOrNull()
+                    ?.index ?: 0
+
+            val totalItems =
+                layoutInfo.totalItemsCount
+
+            lastVisibleItemIndex >= totalItems - 2
+        }
+            .distinctUntilChanged()
+            .collect { shouldLoadMore ->
+
+                if (shouldLoadMore && !isLoadingMore) {
+                    onLoadMore()
+                }
+            }
+    }
 
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
             bottom = 24.dp
@@ -128,12 +174,7 @@ private fun NewsContent(
     ) {
 
         item {
-            FeaturedNewsCard(
-                news = featuredNews,
-                onClick = {
-                    onNewsClick(featuredNews)
-                }
-            )
+            FeaturedNewsCarousel(news = featuredNews, onNewsClick=onNewsClick)
         }
 
         if (remainingNews.isNotEmpty()) {
@@ -157,15 +198,16 @@ private fun NewsContent(
                     onNewsClick(newsItem)
                 }
             )
-            if (newsItem != remainingNews.lastOrNull()&&!isLoadingMore) {
-                LaunchedEffect(newsItem.newsUrl) {
-                    onLoadMore()
-                }
-            }
         }
-        if(isLoadingMore){
-            item{
-                Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center){
+
+        if (isLoadingMore) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
                     LoadingIndicator()
                 }
             }
@@ -178,12 +220,15 @@ private fun CategorySection(
     selectedCategory: String?,
     onCategoryClick: (String) -> Unit
 ) {
+
     val categories = listOf(
-        "general",
-        "sports",
-        "health",
-        "science",
-        "entertainment"
+        "All",
+        "Business",
+        "Technology",
+        "Sports",
+        "Health",
+        "Science",
+        "Entertainment"
     )
 
     LazyRow(
@@ -193,13 +238,21 @@ private fun CategorySection(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
-        items(categories) { category ->
+        items(
+            items = categories,
+            key = { it }
+        ) { category ->
 
             CategoryChip(
-                title = category.replaceFirstChar {
-                    it.uppercase()
-                },
-                isSelected = selectedCategory == category,
+                title = category,
+
+                isSelected =
+                    if (category == "All") {
+                        selectedCategory == null
+                    } else {
+                        selectedCategory == category.lowercase()
+                    },
+
                 onClick = {
                     onCategoryClick(category)
                 }

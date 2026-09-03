@@ -1,5 +1,6 @@
 package com.example.newsapp.data.remote.api
 
+import android.util.Log
 import okhttp3.Interceptor
 import okhttp3.Response
 
@@ -11,8 +12,8 @@ class ApiKeyInterceptor(
         val newUrl = originalRequest.url.newBuilder()
             .addQueryParameter("apiKey", apiKey)
             .build()
-
         val newRequest = originalRequest.newBuilder().url(newUrl).build()
+
         return chain.proceed(newRequest)
     }
 }

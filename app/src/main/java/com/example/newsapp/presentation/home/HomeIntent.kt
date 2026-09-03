@@ -1,6 +1,7 @@
 package com.example.newsapp.presentation.home
 
 sealed interface HomeIntent {
+    data object SelectAllCategory : HomeIntent
     data class SelectCategory(
         val category: String
     ) : HomeIntent
@@ -8,4 +9,5 @@ sealed interface HomeIntent {
     data object LoadMore: HomeIntent
 
     data object Retry : HomeIntent
+
 }

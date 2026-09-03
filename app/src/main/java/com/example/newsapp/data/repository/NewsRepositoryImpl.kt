@@ -14,7 +14,7 @@ class NewsRepositoryImpl(
             apiService.getTopHeadlines(category = category, page = page, pageSize = pageSize)
         return NewsPage(
             news = response.articles.map { it.toNews() },
-            totalResult = response.totalResult
+            totalResult = response.totalResults
         )
     }
 

@@ -17,7 +17,6 @@ fun NewsDto.toNews(): News{
     return News(
         title = title,
         description = description,
-        content = content,
         imageUrl = urlToImage,
         newsUrl = url,
         sourceName = source.name,
