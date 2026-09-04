@@ -1,6 +1,5 @@
 package com.example.newsapp.data.remote.api
 
-import android.util.Log
 import okhttp3.Interceptor
 import okhttp3.Response
 

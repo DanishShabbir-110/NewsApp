@@ -16,8 +16,7 @@ class NewsRepositoryImpl(
     private val newsDao: NewsDao
 ) : NewsRepository {
     override suspend fun getTopHeadlines(category: String?, page: Int, pageSize: Int): NewsPage {
-        val response =
-            apiService.getTopHeadlines(category = category, page = page, pageSize = pageSize)
+        val response = apiService.getTopHeadlines(category = category, page = page, pageSize = pageSize)
         return NewsPage(
             news = response.articles.map { it.toNews() },
             totalResult = response.totalResults

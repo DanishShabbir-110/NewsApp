@@ -14,4 +14,6 @@ sealed interface Routes: NavKey {
     ) : Routes
     @Serializable
     data object Search:Routes
+    @Serializable
+    data object SaveNews: Routes
 }
