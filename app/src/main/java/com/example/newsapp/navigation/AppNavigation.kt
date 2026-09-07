@@ -30,8 +30,7 @@ fun AppNavigation() {
         else -> null
     }
 
-    val showBottomBar =
-        currentRoute is Routes.Home || currentRoute is Routes.Search || currentRoute is Routes.SaveNews
+    val showBottomBar = currentRoute is Routes.Home || currentRoute is Routes.Search || currentRoute is Routes.SaveNews
 
     Scaffold(
         contentWindowInsets = WindowInsets(0,0,0,0),

@@ -26,7 +26,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.newsapp.domain.model.News
 import com.example.newsapp.presentation.components.CategoryChip
 import com.example.newsapp.presentation.components.ErrorView
-import com.example.newsapp.presentation.components.FeaturedNewsCard
 import com.example.newsapp.presentation.components.FeaturedNewsCarousel
 import com.example.newsapp.presentation.components.LoadingIndicator
 import com.example.newsapp.presentation.components.NewsCard
@@ -72,36 +71,18 @@ private fun HomeContent(
         CategorySection(
             selectedCategory = uiState.selectedCategory,
             onCategoryClick = { category ->
-
-                if (category == "All") {
-
-                    onIntent(
-                        HomeIntent.SelectAllCategory
-                    )
-
-                } else {
-
-                    onIntent(
-                        HomeIntent.SelectCategory(
-                            category.lowercase()
-                        )
-                    )
-                }
+                if (category == "All") onIntent(HomeIntent.SelectAllCategory)
+                else onIntent(HomeIntent.SelectCategory(category.lowercase()))
             }
         )
 
         when {
-
-            uiState.isLoading -> {
-                LoadingIndicator()
-            }
+            uiState.isLoading -> LoadingIndicator()
 
             uiState.error != null -> {
                 ErrorView(
                     message = uiState.error,
-                    onRetry = {
-                        onIntent(HomeIntent.Retry)
-                    }
+                    onRetry = { onIntent(HomeIntent.Retry) }
                 )
             }
 
@@ -109,9 +90,7 @@ private fun HomeContent(
                 NewsContent(
                     news = uiState.news,
                     onNewsClick = onNewsClick,
-                    onLoadMore = {
-                        onIntent(HomeIntent.LoadMore)
-                    },
+                    onLoadMore = { onIntent(HomeIntent.LoadMore) },
                     isLoadingMore = uiState.isLoadingMore
                 )
             }
@@ -145,20 +124,16 @@ private fun NewsContent(
         snapshotFlow {
             val layoutInfo = listState.layoutInfo
 
-            val lastVisibleItemIndex =
-                layoutInfo.visibleItemsInfo
-                    .lastOrNull()
-                    ?.index ?: 0
+            val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
 
-            val totalItems =
-                layoutInfo.totalItemsCount
+            val totalItems = layoutInfo.totalItemsCount
 
             lastVisibleItemIndex >= totalItems - 2
         }
             .distinctUntilChanged()
-            .collect { shouldLoadMore ->
+            .collect { loadMore ->
 
-                if (shouldLoadMore && !isLoadingMore) {
+                if (loadMore && !isLoadingMore) {
                     onLoadMore()
                 }
             }
@@ -174,7 +149,7 @@ private fun NewsContent(
     ) {
 
         item {
-            FeaturedNewsCarousel(news = featuredNews, onNewsClick=onNewsClick)
+            FeaturedNewsCarousel(news = featuredNews, onNewsClick = onNewsClick)
         }
 
         if (remainingNews.isNotEmpty()) {

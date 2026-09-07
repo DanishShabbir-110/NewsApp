@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.newsapp.domain.model.News
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun FeaturedNewsCarousel(
@@ -31,7 +32,7 @@ fun FeaturedNewsCarousel(
             return@LaunchedEffect
         }
         while (true) {
-            delay(2000)
+            delay(2000.milliseconds)
             val nextPage = (pageState.currentPage + 1) % featuredNews.size
             pageState.animateScrollToPage(page = nextPage)
         }

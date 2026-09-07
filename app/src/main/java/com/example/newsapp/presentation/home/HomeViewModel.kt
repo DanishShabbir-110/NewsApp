@@ -12,9 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class HomeViewModel(
-    private val repository: NewsRepository
-) : ViewModel() {
+class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
 
     private var currentPage = 1
 
@@ -22,8 +20,7 @@ class HomeViewModel(
 
     private val _uiState = MutableStateFlow(HomeUiState())
 
-    val uiState: StateFlow<HomeUiState> =
-        _uiState.asStateFlow()
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
         loadNews()
@@ -35,7 +32,6 @@ class HomeViewModel(
             is HomeIntent.SelectCategory -> {
                 selectCategory(intent.category)
             }
-
             HomeIntent.Retry -> {
                 retry()
             }
@@ -174,10 +170,10 @@ class HomeViewModel(
                     page = currentPage,
                     pageSize = PAGE_SIZE
                 )
-                println("PAGINATION -> API page = $currentPage")
-                println("PAGINATION -> category = $category")
-                println("PAGINATION -> result.news.size = ${result.news.size}")
-                println("PAGINATION -> totalResult = ${result.totalResult}")
+//                println("PAGINATION -> API page = $currentPage")
+//                println("PAGINATION -> category = $category")
+//                println("PAGINATION -> result.news.size = ${result.news.size}")
+//                println("PAGINATION -> totalResult = ${result.totalResult}")
                 totalAvailableResults = minOf(
                     result.totalResult,
                     DEVELOPER_RESULT_LIMIT
@@ -185,14 +181,7 @@ class HomeViewModel(
 
                 _uiState.update { state ->
 
-                    val updatedNews = if (isLoadingMore) {
-                            (state.news + result.news)
-                                .distinctBy { it.newsUrl }
-
-                        } else {
-
-                            result.news
-                        }
+                    val updatedNews = if (isLoadingMore) (state.news + result.news).distinctBy { it.newsUrl } else result.news
 
                     val nextPage = currentPage + 1
 
