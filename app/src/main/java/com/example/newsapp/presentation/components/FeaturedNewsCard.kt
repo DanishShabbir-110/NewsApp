@@ -64,5 +64,4 @@ fun FeaturedNewsCard(news: News, onClick: () -> Unit, modifier: Modifier = Modif
             }
         }
     }
-
 }

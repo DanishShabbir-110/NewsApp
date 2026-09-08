@@ -1,4 +1,4 @@
-package com.example.newsapp.navigation
+package com.example.newsapp.presentation.navigation
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
@@ -12,14 +12,15 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.example.newsapp.presentation.components.BottomNavItem
 import com.example.newsapp.presentation.components.NewsBottomBar
-import com.example.newsapp.presentation.home.HomeScreen
-import com.example.newsapp.presentation.newsdetail.NewsDetailScreen
-import com.example.newsapp.presentation.savenews.SaveNewsScreen
-import com.example.newsapp.presentation.search.SearchScreen
+import com.example.newsapp.presentation.home.homeScreenComposable
+import com.example.newsapp.presentation.newsdetail.newsDetailScreenComposable
+import com.example.newsapp.presentation.savenews.saveNewsScreenComposable
+import com.example.newsapp.presentation.search.searchScreenComposable
+import com.example.newsapp.presentation.splash.splashScreenComposable
 
 @Composable
 fun AppNavigation() {
-    val backStack = rememberNavBackStack(Routes.Home)
+    val backStack = rememberNavBackStack(Routes.Splash)
 
     val currentRoute = backStack.lastOrNull()
 
@@ -30,10 +31,11 @@ fun AppNavigation() {
         else -> null
     }
 
-    val showBottomBar = currentRoute is Routes.Home || currentRoute is Routes.Search || currentRoute is Routes.SaveNews
+    val showBottomBar =
+        currentRoute is Routes.Home || currentRoute is Routes.Search || currentRoute is Routes.SaveNews
 
     Scaffold(
-        contentWindowInsets = WindowInsets(0,0,0,0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (showBottomBar && selectedBottomItem != null) {
                 NewsBottomBar(
@@ -66,6 +68,18 @@ fun AppNavigation() {
             }
         }
     ) { innerPadding ->
+
+        val entryProvider = entryProvider {
+
+            homeScreenComposable(backStack)
+
+            newsDetailScreenComposable(backStack)
+
+            searchScreenComposable(backStack)
+
+            saveNewsScreenComposable(backStack)
+            splashScreenComposable(backStack)
+        }
         NavDisplay(
             backStack = backStack,
             modifier = Modifier.padding(innerPadding),
@@ -74,44 +88,12 @@ fun AppNavigation() {
                     backStack.removeLastOrNull()
                 }
             },
-            entryProvider = entryProvider {
-                entry<Routes.Home> {
-                    HomeScreen(
-                        onNewsClick = { news ->
-                            backStack.add(Routes.Detail(news = news))
-                        }
-                    )
-                }
-                entry<Routes.Detail> { route ->
-                    NewsDetailScreen(
-                        news = route.news,
-                        onBackClick = { backStack.removeLastOrNull() }
-                    )
-                }
-                entry<Routes.Search> {
-                    SearchScreen(
-                        onNewsClick = { news ->
-                            backStack.add(Routes.Detail(news = news))
-                        }
-                    )
-                }
-
-                entry<Routes.SaveNews> {
-                    SaveNewsScreen(
-                        onNewsClick = { news ->
-                            backStack.add(Routes.Detail(news = news))
-                        }
-                    )
-                }
-            }
+            entryProvider = entryProvider
         )
     }
 }
 
-private fun navigationTopLevel(
-    backStack: NavBackStack<NavKey>,
-    route: Routes
-) {
+private fun navigationTopLevel(backStack: NavBackStack<NavKey>, route: Routes) {
     if (backStack.lastOrNull() == route) return
     backStack.clear()
     backStack.add(route)

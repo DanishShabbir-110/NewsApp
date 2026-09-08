@@ -1,9 +1,7 @@
 package com.example.newsapp.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
@@ -14,9 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun LoadingIndicator(
-    text:String="Fetching news...."
-) {
+fun LoadingIndicator(text: String = "Fetching news....") {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -28,7 +24,7 @@ fun LoadingIndicator(
         CircularProgressIndicator()
 
         Text(
-            text =text
+            text = text
         )
     }
 }

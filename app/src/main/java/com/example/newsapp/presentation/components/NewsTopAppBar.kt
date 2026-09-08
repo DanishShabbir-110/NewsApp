@@ -34,11 +34,11 @@ fun NewsTopAppBar(
             }
         },
         actions = {
-            if(showBookmarkButton){
+            if (showBookmarkButton) {
                 IconButton(onClick = onBookmarkClick) {
                     Icon(
-                        imageVector = if(isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                        contentDescription = if(isBookmarked) "Remove saved news " else "Save news"
+                        imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                        contentDescription = if (isBookmarked) "Remove saved news " else "Save news"
                     )
                 }
             }

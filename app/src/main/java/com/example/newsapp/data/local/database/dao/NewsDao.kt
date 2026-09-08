@@ -1,10 +1,10 @@
-package com.example.newsapp.data.local.dao
+package com.example.newsapp.data.local.database.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.newsapp.data.local.entity.SavedNewsEntity
+import com.example.newsapp.data.local.database.entity.SavedNewsEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

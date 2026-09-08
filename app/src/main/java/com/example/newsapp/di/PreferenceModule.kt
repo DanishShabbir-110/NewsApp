@@ -1,7 +1,7 @@
 package com.example.newsapp.di
 
 import android.content.Context
-import com.example.newsapp.data.local.datastore.SearchPreferences
+import com.example.newsapp.data.local.sharedpreferences.SearchPreferences
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 

@@ -1,8 +1,8 @@
 package com.example.newsapp.data.repository
 
-import com.example.newsapp.data.local.dao.NewsDao
-import com.example.newsapp.data.local.entity.toNews
-import com.example.newsapp.data.local.entity.toSavedNewsEntity
+import com.example.newsapp.data.local.database.dao.NewsDao
+import com.example.newsapp.data.local.database.entity.toNews
+import com.example.newsapp.data.local.database.entity.toSavedNewsEntity
 import com.example.newsapp.data.remote.api.NewsApiService
 import com.example.newsapp.data.remote.dto.toNews
 import com.example.newsapp.domain.model.News

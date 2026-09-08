@@ -37,20 +37,17 @@ enum class BottomNavItem(
 }
 
 @Composable
-fun NewsBottomBar(
-    selectedItem: BottomNavItem,
-    onItemClick: (BottomNavItem) -> Unit
-) {
+fun NewsBottomBar(selectedItem: BottomNavItem, onItemClick: (BottomNavItem) -> Unit) {
     val items = listOf(BottomNavItem.Home, BottomNavItem.Search, BottomNavItem.SaveNews)
     NavigationBar {
         items.forEach { item ->
             val isSelected = selectedItem == item
             NavigationBarItem(
                 selected = isSelected,
-                onClick = {onItemClick(item)},
+                onClick = { onItemClick(item) },
                 icon = {
                     Icon(
-                        imageVector = if(isSelected) item.selectedIcon else item.unSelectedIcon,
+                        imageVector = if (isSelected) item.selectedIcon else item.unSelectedIcon,
                         contentDescription = item.title
                     )
                 },

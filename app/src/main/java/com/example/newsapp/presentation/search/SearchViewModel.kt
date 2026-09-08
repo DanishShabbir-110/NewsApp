@@ -2,7 +2,7 @@ package com.example.newsapp.presentation.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.newsapp.data.local.datastore.SearchPreferences
+import com.example.newsapp.data.local.sharedpreferences.SearchPreferences
 import com.example.newsapp.domain.model.News
 import com.example.newsapp.domain.repository.NewsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,8 @@ class SearchViewModel(
     private val repository: NewsRepository,
     private val searchPreferences: SearchPreferences
 ) : ViewModel() {
-    private var _uiState = MutableStateFlow(SearchUiState(recentSearches = searchPreferences.getRecentSearches()))
+    private var _uiState =
+        MutableStateFlow(SearchUiState(recentSearches = searchPreferences.getRecentSearches()))
     val state = _uiState.asStateFlow()
 
     fun onIntent(intent: SearchIntent) {
@@ -118,3 +119,11 @@ data class SearchUiState(
     val recentSearches: List<String> = emptyList(),
     val error: String? = null
 )
+
+sealed class SearchIntent {
+    data class QueryChanged(val query: String) : SearchIntent()
+    data object Search : SearchIntent()
+    data class RecentSearchClick(val query: String) : SearchIntent()
+    data object ClearRecentSearches : SearchIntent()
+    data object Retry : SearchIntent()
+}

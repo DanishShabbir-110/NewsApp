@@ -17,9 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun EmptyState(
-    message: String
-) {
+fun EmptyState(message: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()

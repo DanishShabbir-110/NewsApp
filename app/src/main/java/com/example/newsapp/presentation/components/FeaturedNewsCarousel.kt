@@ -21,10 +21,7 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun FeaturedNewsCarousel(
-    news: List<News>,
-    onNewsClick: (News) -> Unit
-) {
+fun FeaturedNewsCarousel(news: List<News>, onNewsClick: (News) -> Unit) {
     val featuredNews = news.take(3)
     val pageState = rememberPagerState(pageCount = { featuredNews.size })
     LaunchedEffect(featuredNews.size) {
@@ -66,9 +63,7 @@ fun FeaturedNewsCarousel(
                             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
                             shape = MaterialTheme.shapes.small
                         )
-                ) {
-
-                }
+                )
             }
         }
     }

@@ -103,6 +103,9 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 
+    //Splash Api
+    implementation("androidx.core:core-splashscreen:1.2.0")
+
     //Navigation 3
     implementation("androidx.navigation3:navigation3-runtime:1.2.0-beta01")
     implementation("androidx.navigation3:navigation3-ui:1.2.0-beta01")

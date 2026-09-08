@@ -12,9 +12,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SaveNewsViewModel(
-    private val repository: NewsRepository
-) : ViewModel() {
+class SaveNewsViewModel(private val repository: NewsRepository) : ViewModel() {
     private var _uiState = MutableStateFlow(SaveNewsUiState())
     val uiState = _uiState.asStateFlow()
     private var saveNewsJob: Job? = null
@@ -29,7 +27,7 @@ class SaveNewsViewModel(
                 removeNews(intent.news)
             }
 
-            SaveNewsIntent.Retry ->{
+            SaveNewsIntent.Retry -> {
                 observeSaveNews()
             }
         }
@@ -52,7 +50,7 @@ class SaveNewsViewModel(
 
     private fun observeSaveNews() {
         saveNewsJob?.cancel()
-        saveNewsJob=viewModelScope.launch {
+        saveNewsJob = viewModelScope.launch {
             repository.getSavedNews().catch { exception ->
                 _uiState.update {
                     it.copy(
@@ -78,3 +76,9 @@ data class SaveNewsUiState(
     val news: List<News> = emptyList(),
     val error: String? = null
 )
+
+sealed class SaveNewsIntent {
+    data class RemoveNews(val news: News): SaveNewsIntent()
+
+    data object Retry: SaveNewsIntent()
+}

@@ -61,3 +61,9 @@ data class NewsDetailUiState(
     val news: News? = null,
     val isBookMarked: Boolean = false
 )
+
+sealed class NewsDetailIntent {
+    data class SetNews(val news: News): NewsDetailIntent()
+
+    data object BookmarkClick: NewsDetailIntent()
+}

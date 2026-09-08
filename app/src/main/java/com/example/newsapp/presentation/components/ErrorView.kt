@@ -9,20 +9,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ErrorView(
-    message: String,
-    onRetry: () -> Unit
-) {
+fun ErrorView(message: String, onRetry: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(text = message)
-
-        Button(
-            onClick = onRetry
-        ) {
-            Text(text="Retry")
+        Button(onClick = onRetry) {
+            Text(text = "Retry")
         }
     }
 }

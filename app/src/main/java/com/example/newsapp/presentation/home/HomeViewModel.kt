@@ -32,6 +32,7 @@ class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
             is HomeIntent.SelectCategory -> {
                 selectCategory(intent.category)
             }
+
             HomeIntent.Retry -> {
                 retry()
             }
@@ -40,15 +41,15 @@ class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
                 loadMore()
             }
 
-            HomeIntent.SelectAllCategory ->{
+            HomeIntent.SelectAllCategory -> {
                 selectAllCategory()
             }
         }
     }
 
     private fun selectAllCategory() {
-        currentPage=1
-        totalAvailableResults= Int.MAX_VALUE
+        currentPage = 1
+        totalAvailableResults = Int.MAX_VALUE
 
         _uiState.update {
             it.copy(
@@ -95,9 +96,7 @@ class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
         )
     }
 
-    private fun selectCategory(
-        category: String
-    ) {
+    private fun selectCategory(category: String) {
 
         currentPage = 1
 
@@ -137,10 +136,7 @@ class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
         }
     }
 
-    private fun loadNews(
-        category: String? = null,
-        isLoadingMore: Boolean = false
-    ) {
+    private fun loadNews(category: String? = null, isLoadingMore: Boolean = false) {
 
         viewModelScope.launch {
 
@@ -170,10 +166,6 @@ class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
                     page = currentPage,
                     pageSize = PAGE_SIZE
                 )
-//                println("PAGINATION -> API page = $currentPage")
-//                println("PAGINATION -> category = $category")
-//                println("PAGINATION -> result.news.size = ${result.news.size}")
-//                println("PAGINATION -> totalResult = ${result.totalResult}")
                 totalAvailableResults = minOf(
                     result.totalResult,
                     DEVELOPER_RESULT_LIMIT
@@ -181,7 +173,8 @@ class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
 
                 _uiState.update { state ->
 
-                    val updatedNews = if (isLoadingMore) (state.news + result.news).distinctBy { it.newsUrl } else result.news
+                    val updatedNews =
+                        if (isLoadingMore) (state.news + result.news).distinctBy { it.newsUrl } else result.news
 
                     val nextPage = currentPage + 1
 
@@ -189,7 +182,8 @@ class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
 
                     val nextEndIndex = nextStartIndex + PAGE_SIZE - 1
 
-                    val hasMoreData = updatedNews.size < totalAvailableResults && result.news.isNotEmpty() && nextEndIndex <= DEVELOPER_RESULT_LIMIT
+                    val hasMoreData =
+                        updatedNews.size < totalAvailableResults && result.news.isNotEmpty() && nextEndIndex <= DEVELOPER_RESULT_LIMIT
 
                     state.copy(
                         isLoading = false,
@@ -225,3 +219,10 @@ data class HomeUiState(
     val selectedCategory: String? = null,
     val error: String? = null
 )
+
+sealed class HomeIntent {
+    data object SelectAllCategory : HomeIntent()
+    data class SelectCategory(val category: String) : HomeIntent()
+    data object LoadMore : HomeIntent()
+    data object Retry : HomeIntent()
+}

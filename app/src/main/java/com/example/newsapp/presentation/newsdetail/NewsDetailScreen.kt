@@ -1,6 +1,5 @@
 package com.example.newsapp.presentation.newsdetail
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,46 +13,34 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.example.newsapp.domain.model.News
 import com.example.newsapp.presentation.components.NewsTopAppBar
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun NewsDetailScreen(
     news: News,
-    onBackClick: () -> Unit,
-    viewModel: NewsDetailViewModel = koinViewModel()
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(news) {
-        viewModel.onIntent(NewsDetailIntent.SetNews(news))
-    }
-    NewsDetailContent(
-        uiState = uiState,
-        onBackClick = onBackClick,
-        onIntent = viewModel::onIntent
-    )
-}
-
-@Composable
-fun NewsDetailContent(
     uiState: NewsDetailUiState,
     onBackClick: () -> Unit,
     onIntent: (NewsDetailIntent) -> Unit
 ) {
+    LaunchedEffect(news) {
+        onIntent(NewsDetailIntent.SetNews(news))
+    }
+
     val news = uiState.news ?: return
-    val uriHandler= LocalUriHandler.current
+    val uriHandler = LocalUriHandler.current
+
     Scaffold(
         topBar = {
             NewsTopAppBar(
@@ -62,12 +49,13 @@ fun NewsDetailContent(
                 onBackClick = onBackClick,
                 showBookmarkButton = true,
                 isBookmarked = uiState.isBookMarked,
-                onBookmarkClick={
+                onBookmarkClick = {
                     onIntent(NewsDetailIntent.BookmarkClick)
                 }
             )
         }
     ) { innerPadding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -82,6 +70,7 @@ fun NewsDetailContent(
                     .height(240.dp),
                 contentScale = ContentScale.Crop
             )
+
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
@@ -90,62 +79,76 @@ fun NewsDetailContent(
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text(
                     text = news.title,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
+
                 Spacer(modifier = Modifier.height(12.dp))
+
                 if (!news.author.isNullOrBlank()) {
                     Text(
                         text = "By ${news.author}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+
                     Spacer(modifier = Modifier.height(4.dp))
                 }
+
                 Text(
                     text = news.publishedAt,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
                 Spacer(modifier = Modifier.height(20.dp))
+
                 if (!news.description.isNullOrBlank()) {
                     Text(
                         text = news.description,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium
                     )
+
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
                 if (!news.content.isNullOrBlank()) {
+                    val cleanContent = news.content.substringBefore("[+").trim()
 
-                    val cleanContent = news.content
-                        .substringBefore("[+")
-                        .trim()
+                    val linkStyle = SpanStyle(
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold
+                    )
 
                     Text(
                         text = buildAnnotatedString {
-
                             append(cleanContent)
-
                             append(" ")
 
-                            withStyle(
-                                style = SpanStyle(
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.SemiBold
+                            withLink(
+                                LinkAnnotation.Clickable(
+                                    tag = "see_more",
+                                    styles = TextLinkStyles(
+                                        style = linkStyle,
+                                        focusedStyle = linkStyle,
+                                        hoveredStyle = linkStyle,
+                                        pressedStyle = linkStyle
+                                    ),
+                                    linkInteractionListener = {
+                                        uriHandler.openUri(news.newsUrl)
+                                    }
                                 )
                             ) {
                                 append("See more")
                             }
                         },
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.clickable {
-                            uriHandler.openUri(news.newsUrl)
-                        }
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
             }
