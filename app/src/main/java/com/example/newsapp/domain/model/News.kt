@@ -9,7 +9,7 @@ data class News(
     val content:String?,
     val imageUrl:String?,
     val newsUrl: String,
-    val sourceName: String,
+    val sourceName: String?,
     val publishedAt: String,
     val author: String?,
 )

@@ -19,7 +19,7 @@ data class SavedNewsEntity(
     @ColumnInfo("image_url")
     val imageUrl: String?,
     @ColumnInfo("source_name")
-    val sourceName: String,
+    val sourceName: String?,
     @ColumnInfo("published_at")
     val publishedAt: String,
     @ColumnInfo("author_name")

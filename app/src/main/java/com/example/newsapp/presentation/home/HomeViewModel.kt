@@ -166,6 +166,11 @@ class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
                     page = currentPage,
                     pageSize = PAGE_SIZE
                 )
+                println("DEBUG_HOME: API response received")
+                println("DEBUG_HOME: Received news -> ${result.news.size}")
+                println("DEBUG_HOME: Total results -> ${result.totalResult}")
+
+
                 totalAvailableResults = minOf(
                     result.totalResult,
                     DEVELOPER_RESULT_LIMIT
