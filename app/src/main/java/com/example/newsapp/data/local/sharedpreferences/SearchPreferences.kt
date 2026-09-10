@@ -1,10 +1,10 @@
 package com.example.newsapp.data.local.sharedpreferences
 
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import com.example.newsapp.utils.Constants.KEY_RECENT_SEARCHES
 import com.example.newsapp.utils.Constants.MAX_RECENT_SEARCHES
 import com.example.newsapp.utils.Constants.SEPARATOR
-import androidx.core.content.edit
 
 
 class SearchPreferences(private val sharedPreferences: SharedPreferences) {

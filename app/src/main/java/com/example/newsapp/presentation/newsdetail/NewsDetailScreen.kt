@@ -75,7 +75,7 @@ fun NewsDetailScreen(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
-                    text = news.sourceName?:"",
+                    text = news.sourceName ?: "",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary
                 )

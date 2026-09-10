@@ -5,18 +5,14 @@ import com.example.newsapp.domain.model.News
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed interface Routes: NavKey {
+sealed interface Routes : NavKey {
     @Serializable
-    data object Home: Routes
+    data object Main : Routes
 
     @Serializable
-    data object Splash:Routes
+    data object Splash : Routes
+
     @Serializable
-    data class Detail(
-        val news: News
-    ) : Routes
-    @Serializable
-    data object Search:Routes
-    @Serializable
-    data object SaveNews: Routes
+    data class Detail(val news: News) : Routes
+
 }

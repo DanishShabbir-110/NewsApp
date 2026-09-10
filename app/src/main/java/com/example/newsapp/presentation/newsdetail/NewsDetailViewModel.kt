@@ -63,7 +63,7 @@ data class NewsDetailUiState(
 )
 
 sealed class NewsDetailIntent {
-    data class SetNews(val news: News): NewsDetailIntent()
+    data class SetNews(val news: News) : NewsDetailIntent()
 
-    data object BookmarkClick: NewsDetailIntent()
+    data object BookmarkClick : NewsDetailIntent()
 }

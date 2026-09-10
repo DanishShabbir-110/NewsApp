@@ -17,7 +17,11 @@ import com.example.newsapp.presentation.home.components.CategorySection
 import com.example.newsapp.presentation.home.components.NewsContent
 
 @Composable
-fun HomeScreen(uiState: HomeUiState, onIntent: (HomeIntent) -> Unit, onNewsClick: (News) -> Unit) {
+fun HomeScreen(
+    uiState: HomeUiState,
+    onIntent: (HomeIntent) -> Unit,
+    onNewsClick: (News) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()

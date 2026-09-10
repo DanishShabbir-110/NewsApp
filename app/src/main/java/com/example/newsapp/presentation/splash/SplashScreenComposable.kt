@@ -5,12 +5,12 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.example.newsapp.presentation.navigation.Routes
 
-fun EntryProviderScope<NavKey>.splashScreenComposable(backStack: NavBackStack<NavKey>){
-    entry<Routes.Splash>{
+fun EntryProviderScope<NavKey>.splashScreenComposable(backStack: NavBackStack<NavKey>) {
+    entry<Routes.Splash> {
         SplashScreen(
-            onSplashFinished ={
+            onSplashFinished = {
                 backStack.clear()
-                backStack.add(Routes.Home)
+                backStack.add(Routes.Main)
             }
         )
     }

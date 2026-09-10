@@ -109,6 +109,7 @@ dependencies {
     //Navigation 3
     implementation("androidx.navigation3:navigation3-runtime:1.2.0-beta01")
     implementation("androidx.navigation3:navigation3-ui:1.2.0-beta01")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-navigation3:2.12.0-alpha02")
 
     //Kotlin Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")

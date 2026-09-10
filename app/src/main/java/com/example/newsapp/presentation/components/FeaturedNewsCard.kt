@@ -43,7 +43,7 @@ fun FeaturedNewsCard(news: News, onClick: () -> Unit, modifier: Modifier = Modif
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = news.sourceName?:"",
+                    text = news.sourceName ?: "",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary
                 )

@@ -78,7 +78,7 @@ data class SaveNewsUiState(
 )
 
 sealed class SaveNewsIntent {
-    data class RemoveNews(val news: News): SaveNewsIntent()
+    data class RemoveNews(val news: News) : SaveNewsIntent()
 
-    data object Retry: SaveNewsIntent()
+    data object Retry : SaveNewsIntent()
 }

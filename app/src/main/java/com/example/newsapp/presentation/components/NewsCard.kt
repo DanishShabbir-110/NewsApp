@@ -52,7 +52,7 @@ fun NewsCard(news: News, onClick: () -> Unit, modifier: Modifier = Modifier) {
             ) {
 
                 Text(
-                    text = news.sourceName?:"",
+                    text = news.sourceName ?: "",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary
                 )

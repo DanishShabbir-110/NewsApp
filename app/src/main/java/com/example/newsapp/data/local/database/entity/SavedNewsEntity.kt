@@ -15,7 +15,7 @@ data class SavedNewsEntity(
     @ColumnInfo("description")
     val description: String?,
     @ColumnInfo("content")
-    val content:String?,
+    val content: String?,
     @ColumnInfo("image_url")
     val imageUrl: String?,
     @ColumnInfo("source_name")
@@ -23,7 +23,7 @@ data class SavedNewsEntity(
     @ColumnInfo("published_at")
     val publishedAt: String,
     @ColumnInfo("author_name")
-    val author:String?
+    val author: String?
 )
 
 fun News.toSavedNewsEntity(): SavedNewsEntity {
@@ -31,7 +31,7 @@ fun News.toSavedNewsEntity(): SavedNewsEntity {
         newsUrl = newsUrl,
         title = title,
         description = description,
-        content=content,
+        content = content,
         imageUrl = imageUrl,
         sourceName = sourceName,
         publishedAt = publishedAt,

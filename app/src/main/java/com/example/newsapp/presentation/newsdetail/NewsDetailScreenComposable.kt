@@ -17,7 +17,7 @@ fun EntryProviderScope<NavKey>.newsDetailScreenComposable(backStack: NavBackStac
         NewsDetailScreen(
             news = route.news,
             uiState = uiState,
-            onBackClick = { backStack.removeLastOrNull() },
+            onBackClick = { backStack.remove(Routes.Detail(route.news)) },
             onIntent = viewModel::onIntent
         )
     }
