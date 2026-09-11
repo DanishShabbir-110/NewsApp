@@ -3,10 +3,8 @@ package com.example.newsapp.presentation.navigation
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.newsapp.presentation.main.mainScreenComposable
 import com.example.newsapp.presentation.newsdetail.newsDetailScreenComposable
@@ -24,10 +22,6 @@ fun AppNavigation() {
     NavDisplay(
         backStack = backStack,
         entryProvider = entryProvider,
-        entryDecorators = listOf(
-            rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator()
-        ),
         onBack = {
             backStack.removeLastOrNull()
         }
