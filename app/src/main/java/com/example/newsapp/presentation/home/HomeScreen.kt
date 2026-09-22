@@ -11,7 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.newsapp.domain.model.News
-import com.example.newsapp.presentation.components.ErrorView
+import com.example.newsapp.presentation.common.BaseScreen
 import com.example.newsapp.presentation.components.LoadingIndicator
 import com.example.newsapp.presentation.home.components.CategorySection
 import com.example.newsapp.presentation.home.components.NewsContent
@@ -43,25 +43,21 @@ fun HomeScreen(
                 else onIntent(HomeIntent.SelectCategory(category.lowercase()))
             }
         )
-
-        when {
-            uiState.isLoading -> LoadingIndicator()
-
-            uiState.error != null -> {
-                ErrorView(
-                    message = uiState.error,
-                    onRetry = { onIntent(HomeIntent.Retry) }
-                )
+        BaseScreen(
+            uiState = uiState,
+            isLoading = { it.isLoading },
+            error = { it.error },
+            onRetry = { onIntent(HomeIntent.Retry) },
+            loadingContent = {
+                LoadingIndicator("Loading news....")
             }
-
-            else -> {
-                NewsContent(
-                    news = uiState.news,
-                    onNewsClick = onNewsClick,
-                    onLoadMore = { onIntent(HomeIntent.LoadMore) },
-                    isLoadingMore = uiState.isLoadingMore
-                )
-            }
+        ) { state ->
+            NewsContent(
+                news = state.news,
+                onNewsClick = onNewsClick,
+                onLoadMore = { onIntent(HomeIntent.LoadMore) },
+                isLoadingMore = state.isLoadingMore
+            )
         }
     }
 }

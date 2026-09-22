@@ -12,7 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.newsapp.domain.model.News
-import com.example.newsapp.presentation.components.ErrorView
+import com.example.newsapp.presentation.common.BaseScreen
 import com.example.newsapp.presentation.components.LoadingIndicator
 import com.example.newsapp.presentation.savenews.components.EmptySavedNews
 import com.example.newsapp.presentation.savenews.components.SavedNewsList
@@ -35,30 +35,19 @@ fun SaveNewsScreen(
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
         )
-
-        when {
-            uiState.isLoading -> {
-                LoadingIndicator(text = "Loading saved news...")
+        BaseScreen(
+            uiState = uiState,
+            isLoading = { it.isLoading },
+            error = { it.error },
+            onRetry = { onIntent(SaveNewsIntent.Retry) },
+            loadingContent = {
+                LoadingIndicator("Loading saved news...")
             }
-
-            uiState.error != null -> {
-                ErrorView(
-                    message = uiState.error,
-                    onRetry = {
-                        onIntent(SaveNewsIntent.Retry)
-                    }
-                )
-            }
-
-            uiState.news.isEmpty() -> {
+        ) { state ->
+            if (state.news.isEmpty()) {
                 EmptySavedNews()
-            }
-
-            else -> {
-                SavedNewsList(
-                    news = uiState.news,
-                    onNewsClick = onNewsClick
-                )
+            } else {
+                SavedNewsList(news = state.news, onNewsClick = onNewsClick)
             }
         }
     }

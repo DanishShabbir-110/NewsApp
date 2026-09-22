@@ -1,20 +1,20 @@
 package com.example.newsapp.presentation.newsdetail
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.newsapp.domain.model.News
 import com.example.newsapp.domain.repository.NewsRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.example.newsapp.presentation.common.BaseViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class NewsDetailViewModel(private val repository: NewsRepository) : ViewModel() {
-    private var _uiState = MutableStateFlow(NewsDetailUiState())
-    val uiState = _uiState.asStateFlow()
+class NewsDetailViewModel(
+    private val repository: NewsRepository
+) : BaseViewModel<NewsDetailIntent, NewsDetailUiState>(NewsDetailUiState()) {
 
-    fun onIntent(intent: NewsDetailIntent) {
+    private var bookmarkJob: Job? = null
+
+    override fun onIntent(intent: NewsDetailIntent) {
         when (intent) {
             is NewsDetailIntent.SetNews -> {
                 setNews(intent.news)
@@ -27,8 +27,8 @@ class NewsDetailViewModel(private val repository: NewsRepository) : ViewModel() 
     }
 
     private fun toggleBookmark() {
-        val news = _uiState.value.news ?: return
-        val isBookMarked = _uiState.value.isBookMarked
+        val news = uiState.value.news ?: return
+        val isBookMarked = uiState.value.isBookMarked
 
         viewModelScope.launch {
             if (isBookMarked) repository.removeSavedNews(news.newsUrl)
@@ -38,16 +38,17 @@ class NewsDetailViewModel(private val repository: NewsRepository) : ViewModel() 
     }
 
     private fun setNews(news: News) {
-        _uiState.update {
+        updateState {
             it.copy(news = news)
         }
         observeBookmarkState(news.newsUrl)
     }
 
     private fun observeBookmarkState(newsUrl: String) {
-        viewModelScope.launch {
+        bookmarkJob?.cancel()
+        bookmarkJob=viewModelScope.launch {
             repository.isNewsSaved(newsUrl).collectLatest { isSaved ->
-                _uiState.update {
+                updateState {
                     it.copy(
                         isBookMarked = isSaved
                     )

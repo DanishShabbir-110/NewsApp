@@ -1,27 +1,21 @@
 package com.example.newsapp.presentation.savenews
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.newsapp.domain.model.News
 import com.example.newsapp.domain.repository.NewsRepository
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.example.newsapp.presentation.common.BaseViewModel
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SaveNewsViewModel(private val repository: NewsRepository) : ViewModel() {
-    private var _uiState = MutableStateFlow(SaveNewsUiState())
-    val uiState = _uiState.asStateFlow()
-    private var saveNewsJob: Job? = null
+class SaveNewsViewModel(
+    private val repository: NewsRepository
+) : BaseViewModel<SaveNewsIntent, SaveNewsUiState>(SaveNewsUiState()) {
 
     init {
         observeSaveNews()
     }
 
-    fun onIntent(intent: SaveNewsIntent) {
+    override fun onIntent(intent: SaveNewsIntent) {
         when (intent) {
             is SaveNewsIntent.RemoveNews -> {
                 removeNews(intent.news)
@@ -38,7 +32,7 @@ class SaveNewsViewModel(private val repository: NewsRepository) : ViewModel() {
             try {
                 repository.removeSavedNews(news.newsUrl)
             } catch (ex: Exception) {
-                _uiState.update {
+                updateState {
                     it.copy(
                         isLoading = false,
                         error = ex.message ?: "Unable to remove saved news."
@@ -49,17 +43,16 @@ class SaveNewsViewModel(private val repository: NewsRepository) : ViewModel() {
     }
 
     private fun observeSaveNews() {
-        saveNewsJob?.cancel()
-        saveNewsJob = viewModelScope.launch {
+        viewModelScope.launch {
             repository.getSavedNews().catch { exception ->
-                _uiState.update {
+                updateState {
                     it.copy(
                         isLoading = false,
                         error = exception.message ?: "Something went wrong"
                     )
                 }
-            }.collectLatest { savedNews ->
-                _uiState.update {
+            }.collect { savedNews ->
+                updateState {
                     it.copy(
                         isLoading = false,
                         news = savedNews,

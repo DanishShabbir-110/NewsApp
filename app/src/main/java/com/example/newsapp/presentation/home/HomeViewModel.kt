@@ -1,32 +1,28 @@
 package com.example.newsapp.presentation.home
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.newsapp.domain.model.News
+import com.example.newsapp.domain.model.NewsPage
 import com.example.newsapp.domain.repository.NewsRepository
+import com.example.newsapp.presentation.common.BaseViewModel
 import com.example.newsapp.utils.Constants.DEVELOPER_RESULT_LIMIT
 import com.example.newsapp.utils.Constants.PAGE_SIZE
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
+class HomeViewModel(private val repository: NewsRepository) :
+    BaseViewModel<HomeIntent, HomeUiState>(
+        HomeUiState()
+    ) {
 
     private var currentPage = 1
 
     private var totalAvailableResults = Int.MAX_VALUE
 
-    private val _uiState = MutableStateFlow(HomeUiState())
-
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
-
     init {
         loadNews()
     }
 
-    fun onIntent(intent: HomeIntent) {
+    override fun onIntent(intent: HomeIntent) {
         when (intent) {
 
             is HomeIntent.SelectCategory -> {
@@ -48,10 +44,9 @@ class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
     }
 
     private fun selectAllCategory() {
-        currentPage = 1
-        totalAvailableResults = Int.MAX_VALUE
+        resetPagination()
 
-        _uiState.update {
+        updateState {
             it.copy(
                 selectedCategory = null,
                 news = emptyList(),
@@ -59,34 +54,22 @@ class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
                 error = null
             )
         }
-        loadNews(
-            category = null,
-            isLoadingMore = false
-        )
+        loadNews()
     }
 
     private fun loadMore() {
+        val state = uiState.value
 
-        val state = _uiState.value
+        if (state.isLoading || state.isLoadingMore || !state.hasMoreData) {
+            return
+        }
 
-
-        if (state.isLoading) return
-
-        if (state.isLoadingMore) return
-
-        if (!state.hasMoreData) return
-
-        val nextStartIndex = (currentPage - 1) * PAGE_SIZE + 1
-
-        val nextEndIndex = nextStartIndex + PAGE_SIZE - 1
-
-        if (nextEndIndex > DEVELOPER_RESULT_LIMIT) {
-            _uiState.update {
+        if (getPageEndIndex(currentPage) > DEVELOPER_RESULT_LIMIT) {
+            updateState {
                 it.copy(
                     hasMoreData = false
                 )
             }
-
             return
         }
 
@@ -97,12 +80,9 @@ class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
     }
 
     private fun selectCategory(category: String) {
+        resetPagination()
 
-        currentPage = 1
-
-        totalAvailableResults = Int.MAX_VALUE
-
-        _uiState.update {
+        updateState {
             it.copy(
                 selectedCategory = category,
                 news = emptyList(),
@@ -111,56 +91,28 @@ class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
             )
         }
 
-        loadNews(
-            category = category,
-            isLoadingMore = false
-        )
+        loadNews(category = category)
+    }
+
+    private fun resetPagination() {
+        currentPage = 1
+        totalAvailableResults = Int.MAX_VALUE
     }
 
     private fun retry() {
-
-        if (_uiState.value.news.isEmpty()) {
-
-            currentPage = 1
-
-            totalAvailableResults = Int.MAX_VALUE
-
-            loadNews(
-                category = _uiState.value.selectedCategory,
-                isLoadingMore = false
-            )
-
+        val state = uiState.value
+        if (state.news.isEmpty()) {
+            resetPagination()
+            loadNews(category = state.selectedCategory)
         } else {
-
             loadMore()
         }
     }
 
     private fun loadNews(category: String? = null, isLoadingMore: Boolean = false) {
-
         viewModelScope.launch {
-
-            if (isLoadingMore) {
-
-                _uiState.update {
-                    it.copy(
-                        isLoadingMore = true,
-                        error = null
-                    )
-                }
-
-            } else {
-
-                _uiState.update {
-                    it.copy(
-                        isLoading = true,
-                        error = null
-                    )
-                }
-            }
-
+            updateLoadingState(isLoadingMore)
             try {
-
                 val result = repository.getTopHeadlines(
                     category = category,
                     page = currentPage,
@@ -176,34 +128,16 @@ class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
                     DEVELOPER_RESULT_LIMIT
                 )
 
-                _uiState.update { state ->
-
-                    val updatedNews =
-                        if (isLoadingMore) (state.news + result.news).distinctBy { it.newsUrl } else result.news
-
-                    val nextPage = currentPage + 1
-
-                    val nextStartIndex = (nextPage - 1) * PAGE_SIZE + 1
-
-                    val nextEndIndex = nextStartIndex + PAGE_SIZE - 1
-
-                    val hasMoreData =
-                        updatedNews.size < totalAvailableResults && result.news.isNotEmpty() && nextEndIndex <= DEVELOPER_RESULT_LIMIT
-
-                    state.copy(
-                        isLoading = false,
-                        isLoadingMore = false,
-                        news = updatedNews,
-                        hasMoreData = hasMoreData,
-                        error = null
-                    )
-                }
+                updateNewsState(
+                    result = result,
+                    isLoadingMore = isLoadingMore
+                )
 
                 currentPage++
 
             } catch (ex: Exception) {
 
-                _uiState.update {
+                updateState {
                     it.copy(
                         isLoading = false,
                         isLoadingMore = false,
@@ -214,6 +148,59 @@ class HomeViewModel(private val repository: NewsRepository) : ViewModel() {
             }
         }
     }
+    private fun updateLoadingState(isLoadingMore: Boolean) {
+        if (isLoadingMore) {
+            updateState {
+                it.copy(
+                    isLoadingMore = true,
+                    error = null
+                )
+            }
+        } else {
+            updateState {
+                it.copy(
+                    isLoading = true,
+                    error = null
+                )
+            }
+        }
+    }
+
+    private fun updateNewsState(
+        result: NewsPage,
+        isLoadingMore: Boolean
+    ) {
+        updateState { state ->
+
+            val updatedNews =
+                if (isLoadingMore) {
+                    (state.news + result.news)
+                        .distinctBy { it.newsUrl }
+                } else {
+                    result.news
+                }
+
+            val nextPage = currentPage + 1
+
+            val hasMoreData =
+                updatedNews.size < totalAvailableResults &&
+                        result.news.isNotEmpty() &&
+                        getPageEndIndex(nextPage) <= DEVELOPER_RESULT_LIMIT
+
+            state.copy(
+                isLoading = false,
+                isLoadingMore = false,
+                news = updatedNews,
+                hasMoreData = hasMoreData,
+                error = null
+            )
+        }
+    }
+
+    private fun getPageEndIndex(page: Int): Int {
+        return page * PAGE_SIZE
+    }
+
 }
 
 data class HomeUiState(

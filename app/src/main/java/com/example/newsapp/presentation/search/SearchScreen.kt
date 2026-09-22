@@ -14,8 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.newsapp.domain.model.News
-import com.example.newsapp.presentation.components.EmptyState
-import com.example.newsapp.presentation.components.ErrorView
+import com.example.newsapp.presentation.common.BaseScreen
 import com.example.newsapp.presentation.components.LoadingIndicator
 import com.example.newsapp.presentation.search.components.SearchResultList
 import com.example.newsapp.presentation.search.components.SearchSuggestionContent
@@ -64,49 +63,24 @@ fun SearchScreen(
             modifier = Modifier.height(20.dp)
         )
 
-        when {
-            uiState.query.isBlank() -> {
-                SearchSuggestionContent(
-                    uiState = uiState,
-                    onIntent = onIntent
-                )
-            }
-
-            uiState.isLoading -> {
-
-                LoadingIndicator(
-                    text = "Searching news..."
-                )
-            }
-
-            uiState.error != null -> {
-
-                ErrorView(
-                    message = uiState.error,
-                    onRetry = {
-                        onIntent(SearchIntent.Retry)
-                    }
-                )
-            }
-
-            uiState.news.isNotEmpty() -> {
-                SearchResultList(
-                    news = uiState.news,
-                    onNewsClick = onNewsClick
-                )
-            }
-
-            uiState.query.isNotBlank() -> {
-                EmptyState(
-                    message = "No news found"
-                )
-            }
-
-            else -> {
-                SearchSuggestionContent(
-                    uiState = uiState,
-                    onIntent = onIntent
-                )
+        if (uiState.query.isBlank()) {
+            SearchSuggestionContent(uiState = uiState, onIntent = onIntent)
+        } else {
+            BaseScreen(
+                uiState = uiState,
+                isLoading = { it.isLoading },
+                error = { it.error },
+                onRetry = { onIntent(SearchIntent.Retry) },
+                loadingContent = {
+                    LoadingIndicator("Searching news....")
+                }
+            ) { state ->
+                if (state.news.isNotEmpty()) {
+                    SearchResultList(
+                        news = state.news,
+                        onNewsClick = onNewsClick
+                    )
+                }
             }
         }
     }

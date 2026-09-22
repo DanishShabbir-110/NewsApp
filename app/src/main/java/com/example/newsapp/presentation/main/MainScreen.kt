@@ -36,7 +36,7 @@ fun MainScreen(onNewsClick: (News) -> Unit) {
     val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
     val searchViewModel: SearchViewModel = koinViewModel()
-    val searchUiState by searchViewModel.state.collectAsStateWithLifecycle()
+    val searchUiState by searchViewModel.uiState.collectAsStateWithLifecycle()
 
     val saveNewsViewModel: SaveNewsViewModel = koinViewModel()
     val saveNewsUiState by saveNewsViewModel.uiState.collectAsStateWithLifecycle()

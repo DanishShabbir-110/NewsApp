@@ -1,24 +1,17 @@
 package com.example.newsapp.presentation.search
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.newsapp.data.local.sharedpreferences.SearchPreferences
 import com.example.newsapp.domain.model.News
 import com.example.newsapp.domain.repository.NewsRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import com.example.newsapp.presentation.common.BaseViewModel
 import kotlinx.coroutines.launch
 
 class SearchViewModel(
     private val repository: NewsRepository,
     private val searchPreferences: SearchPreferences
-) : ViewModel() {
-    private var _uiState =
-        MutableStateFlow(SearchUiState(recentSearches = searchPreferences.getRecentSearches()))
-    val state = _uiState.asStateFlow()
-
-    fun onIntent(intent: SearchIntent) {
+) : BaseViewModel<SearchIntent, SearchUiState>(SearchUiState(recentSearches = searchPreferences.getRecentSearches())) {
+    override fun onIntent(intent: SearchIntent) {
         when (intent) {
             is SearchIntent.QueryChanged -> {
                 updateQuery(intent.query)
@@ -44,7 +37,7 @@ class SearchViewModel(
 
     private fun addRecentSearch(query: String) {
         searchPreferences.saveRecentSearcher(query)
-        _uiState.update { state ->
+        updateState { state ->
             state.copy(
                 recentSearches = searchPreferences.getRecentSearches()
             )
@@ -53,7 +46,7 @@ class SearchViewModel(
 
     private fun recentSearchClick(query: String) {
 
-        _uiState.update {
+        updateState {
             it.copy(query = query)
         }
 
@@ -62,7 +55,7 @@ class SearchViewModel(
 
     private fun clearRecentSearches() {
         searchPreferences.clearRecentSearches()
-        _uiState.update {
+        updateState {
             it.copy(
                 recentSearches = emptyList()
             )
@@ -70,11 +63,11 @@ class SearchViewModel(
     }
 
     private fun searchNews() {
-        val query = _uiState.value.query.trim()
+        val query = uiState.value.query.trim()
         if (query.isEmpty()) return
         addRecentSearch(query)
         viewModelScope.launch {
-            _uiState.update {
+            updateState {
                 it.copy(
                     isLoading = true,
                     error = null
@@ -82,7 +75,7 @@ class SearchViewModel(
             }
             try {
                 val result = repository.searchNews(query)
-                _uiState.update {
+                updateState {
                     it.copy(
                         isLoading = false,
                         news = result,
@@ -90,7 +83,7 @@ class SearchViewModel(
                     )
                 }
             } catch (ex: Exception) {
-                _uiState.update {
+                updateState {
                     it.copy(
                         isLoading = false,
                         error = ex.message ?: "Something went wrong"
@@ -101,7 +94,7 @@ class SearchViewModel(
     }
 
     private fun updateQuery(query: String) {
-        _uiState.update {
+        updateState {
             it.copy(
                 query = query,
                 news = if (query.isBlank()) emptyList() else it.news,

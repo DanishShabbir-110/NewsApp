@@ -38,7 +38,7 @@ fun NewsDetailScreen(
         onIntent(NewsDetailIntent.SetNews(news))
     }
 
-    val news = uiState.news ?: return
+    val currentNews = uiState.news ?: return
     val uriHandler = LocalUriHandler.current
 
     Scaffold(
@@ -63,8 +63,8 @@ fun NewsDetailScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             AsyncImage(
-                model = news.imageUrl,
-                contentDescription = news.title,
+                model = currentNews.imageUrl,
+                contentDescription = currentNews.title,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(240.dp),
@@ -75,7 +75,7 @@ fun NewsDetailScreen(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
-                    text = news.sourceName ?: "",
+                    text = currentNews.sourceName ?: "",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -83,14 +83,14 @@ fun NewsDetailScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = news.title,
+                    text = currentNews.title,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                if (!news.author.isNullOrBlank()) {
+                if (!currentNews.author.isNullOrBlank()) {
                     Text(
                         text = "By ${news.author}",
                         style = MaterialTheme.typography.bodyMedium,
@@ -101,16 +101,16 @@ fun NewsDetailScreen(
                 }
 
                 Text(
-                    text = news.publishedAt,
+                    text = currentNews.publishedAt,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                if (!news.description.isNullOrBlank()) {
+                if (!currentNews.description.isNullOrBlank()) {
                     Text(
-                        text = news.description,
+                        text = currentNews.description,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium
                     )
@@ -118,8 +118,8 @@ fun NewsDetailScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                if (!news.content.isNullOrBlank()) {
-                    val cleanContent = news.content.substringBefore("[+").trim()
+                if (!currentNews.content.isNullOrBlank()) {
+                    val cleanContent = currentNews.content.substringBefore("[+").trim()
 
                     val linkStyle = SpanStyle(
                         color = MaterialTheme.colorScheme.primary,
@@ -141,7 +141,7 @@ fun NewsDetailScreen(
                                         pressedStyle = linkStyle
                                     ),
                                     linkInteractionListener = {
-                                        uriHandler.openUri(news.newsUrl)
+                                        uriHandler.openUri(currentNews.newsUrl)
                                     }
                                 )
                             ) {
